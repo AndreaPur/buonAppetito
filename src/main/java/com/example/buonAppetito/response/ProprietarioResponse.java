@@ -20,6 +20,7 @@ public class ProprietarioResponse {
     private String indirizzo;
     private String telefono;
     private LocalDate dataNascita;
+    private List<Long> idRistoranti;
     private List<String> nomiRistoranti;
 
 }

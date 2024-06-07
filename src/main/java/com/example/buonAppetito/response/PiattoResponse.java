@@ -11,5 +11,6 @@ public class PiattoResponse {
 
     private Long id;
     private String nome;
+    private Double prezzo;
 
 }

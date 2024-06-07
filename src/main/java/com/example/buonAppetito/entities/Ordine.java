@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table
+@Table(name = "ordine")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,13 +19,22 @@ public class Ordine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "conto_id", nullable = false)
-    private Conto conto;
-    @ManyToOne
-    @JoinColumn(name = "piatto_id", nullable = false)
-    private Piatto piatto;
+    @JoinColumn(name = "prenotazione_id", nullable = false)
+    private Prenotazione prenotazione;
+    @ManyToMany
+    @JoinTable(
+            name = "ordine_piatti",
+            joinColumns = @JoinColumn(name = "ordine_id"),
+            inverseJoinColumns = @JoinColumn(name = "piatto_id")
+    )
+    private List<Piatto> piatti;
     @Column(nullable = false)
-    private int quantita;
+    private double totale;
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private LocalDateTime creazioneOrdine;
+    @Column
+    private LocalDateTime chiusuraOrdine;
+    @Column(nullable = false)
+    private boolean chiuso = false;
+
 }

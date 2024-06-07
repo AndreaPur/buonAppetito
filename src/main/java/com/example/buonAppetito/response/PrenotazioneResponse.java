@@ -16,7 +16,8 @@ public class PrenotazioneResponse {
     private String cognomeUtente;
     private String nomeRistorante;
     private String nomeComune;
-    private String nTavolo;
+    private Long tavoloId;
+    private Long posti;
     private LocalDateTime orario;
     private LocalDateTime timestamp;
 

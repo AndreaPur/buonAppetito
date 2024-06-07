@@ -1,10 +1,13 @@
 package com.example.buonAppetito.services;
 
 import com.example.buonAppetito.entities.Comune;
+import com.example.buonAppetito.entities.Ristorante;
 import com.example.buonAppetito.exceptions.EntityNotFoundException;
 import com.example.buonAppetito.repositories.ComuneRepository;
+import com.example.buonAppetito.repositories.RistoranteRepository;
 import com.example.buonAppetito.request.ComuneRequest;
 import com.example.buonAppetito.response.ComuneResponse;
+import com.example.buonAppetito.response.RistoranteResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,8 @@ public class ComuneService {
 
     @Autowired
     private ComuneRepository comuneRepository;
+    @Autowired
+    private RistoranteRepository ristoranteRepository;
 
     public ComuneResponse getComuneById(Long id) throws EntityNotFoundException {
         Optional<Comune> comuneOptional = comuneRepository.findById(id);
@@ -59,6 +64,30 @@ public class ComuneService {
         } else {
             throw new EntityNotFoundException(id, "Comune");
         }
+    }
+
+    public List<RistoranteResponse> getRistorantiByComuneNome(String comuneNome) throws EntityNotFoundException {
+        Comune comune = comuneRepository.findComuneByNome(comuneNome);
+        if (comune == null) {
+            throw new EntityNotFoundException(0L, "Comune");
+        }
+
+        List<Ristorante> ristoranti = comune.getRistoranti();
+        return ristoranti.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    private RistoranteResponse convertToResponse(Ristorante ristorante) {
+        return RistoranteResponse.builder()
+                .id(ristorante.getId())
+                .nome(ristorante.getNome())
+                .indirizzo(ristorante.getIndirizzo())
+                .comuneNome(ristorante.getComune().getNome())
+                .postiTotali(ristorante.getPostiTotali())
+                .postiDisponibili(ristorante.getPostiDisponibili())
+                .orarioApertura(ristorante.getOrarioApertura())
+                .orarioChiusura(ristorante.getOrarioChiusura())
+                .menuId(ristorante.getMenus().stream().map(menu -> menu.getId()).collect(Collectors.toList()))
+                .build();
     }
 
     private ComuneResponse convertToResponse(Comune comune) {

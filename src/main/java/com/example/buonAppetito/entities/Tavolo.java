@@ -20,7 +20,11 @@ public class Tavolo {
     @JoinColumn(name = "ristorante_id", nullable = false)
     @JsonBackReference
     private Ristorante ristorante;
+    @OneToOne(mappedBy = "tavolo")
+    private Prenotazione prenotazione;
     @Column(nullable = false)
-    private int posti;
+    private Long posti;
+    @Column(nullable = false)
+    private boolean disponibile = true;
 
 }

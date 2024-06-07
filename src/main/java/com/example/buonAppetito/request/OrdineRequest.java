@@ -2,6 +2,8 @@ package com.example.buonAppetito.request;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -9,8 +11,6 @@ import lombok.*;
 @Builder
 public class OrdineRequest {
 
-    private Long contoId;
-    private Long piattoId;
-    private int quantita;
-
+    private Long prenotazioneId;
+    private List<Long> piattiId;
 }

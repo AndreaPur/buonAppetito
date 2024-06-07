@@ -11,5 +11,8 @@ public class TavoloResponse {
 
     private Long id;
     private String nomeRistorante;
-    private int posti;
+    private Long prenotazioneId;
+    private Long posti;
+    private boolean disponibile;
+
 }

@@ -3,7 +3,7 @@ package com.example.buonAppetito.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -27,14 +27,19 @@ public class Ristorante {
     @NotNull
     private Comune comune;
     @Column(nullable = false)
-    private LocalTime orarioApertura;
+    private Long postiTotali;
     @Column(nullable = false)
-    private LocalTime orarioChiusura;
-    @OneToMany(mappedBy = "ristorante", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Menu> menu;
+    private Long postiDisponibili;
+    @Column(nullable = false)
+    private LocalDateTime orarioApertura;
+    @Column(nullable = false)
+    private LocalDateTime orarioChiusura;
     @ManyToOne
-    @JoinColumn(name = "proprietario_id", nullable = false)
-    private Proprietario proprietario;
+    @JoinColumn(name = "proprietario_id")
+    private Utente proprietario;
+    @OneToMany(mappedBy = "ristorante", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Menu> menus;
     @OneToMany(mappedBy = "ristorante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tavolo> tavoli;
+
 }

@@ -1,0 +1,2 @@
+OrdineResponse(id=1, prenotazioneId=1, piattiNomi=[Pizza, Pizza, Pasta, Acqua, Vino], piattiPrezzi=[10.0, 10.0, 8.0, 2.0, 6.0], totale=36.0, creazioneOrdine=2024-06-04T19:39:33.086832, chiusuraOrdine=2024-06-04T19:40:13.765711)
+OrdineResponse(id=2, prenotazioneId=1, piattiNomi=[Pasta, Pizza], piattiPrezzi=[8.0, 10.0], totale=18.0, creazioneOrdine=2024-06-05T16:25:21.444791, chiusuraOrdine=2024-06-05T16:25:59.229494400)

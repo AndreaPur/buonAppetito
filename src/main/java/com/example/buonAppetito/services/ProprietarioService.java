@@ -1,110 +1,99 @@
 package com.example.buonAppetito.services;
 
-import com.example.buonAppetito.entities.Comune;
-import com.example.buonAppetito.entities.Proprietario;
 import com.example.buonAppetito.entities.Ristorante;
+import com.example.buonAppetito.entities.Utente;
 import com.example.buonAppetito.enums.Role;
 import com.example.buonAppetito.exceptions.EntityNotFoundException;
+import com.example.buonAppetito.exceptions.RoleMismatchException;
 import com.example.buonAppetito.repositories.ComuneRepository;
-import com.example.buonAppetito.repositories.ProprietarioRepository;
 import com.example.buonAppetito.repositories.RistoranteRepository;
-import com.example.buonAppetito.request.ProprietarioRequest;
+import com.example.buonAppetito.repositories.UtenteRepository;
 import com.example.buonAppetito.response.ProprietarioResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ProprietarioService {
 
     @Autowired
-    private ProprietarioRepository proprietarioRepository;
-
-    @Autowired
     private ComuneRepository comuneRepository;
-
     @Autowired
     private RistoranteRepository ristoranteRepository;
+    @Autowired
+    private UtenteRepository utenteRepository;
 
-    public ProprietarioResponse getProprietarioById(Long id) throws EntityNotFoundException {
-        Proprietario proprietario = proprietarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(id, "Proprietario"));
-        return convertToResponse(proprietario);
+    public ProprietarioResponse getProprietarioById(Long id) throws EntityNotFoundException, RoleMismatchException {
+        Utente utente = utenteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id, "Utente"));
+        if (utente.getRole() != Role.RISTORATORE) {
+            throw new RoleMismatchException(id, "L'utente che stai cercando non è un Ristoratore");
+        }
+        return convertToResponse(utente);
     }
 
-    public List<ProprietarioResponse> getAll() {
-        List<Proprietario> proprietari = proprietarioRepository.findAll();
-        return proprietari.stream().map(this::convertToResponse).collect(Collectors.toList());
+    public List<ProprietarioResponse> getAllProprietari() {
+        List<Utente> ristoratori = utenteRepository.findAllByRole(Role.RISTORATORE);
+        return ristoratori.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
-    public ProprietarioResponse createProprietario(ProprietarioRequest request) throws EntityNotFoundException {
-        Comune comune = Optional.ofNullable(comuneRepository.findComuneByNome(request.getNomeComune()))
-                .orElseThrow(() -> new EntityNotFoundException(null, "Comune"));
-
-        List<Ristorante> ristoranti = ristoranteRepository.findAllById(request.getIdRistoranti());
-
-        Proprietario proprietario = Proprietario.builder()
-                .nome(request.getNome())
-                .cognome(request.getCognome())
-                .email(request.getEmail())
-                .comune(comune)
-                .indirizzo(request.getIndirizzo())
-                .telefono(request.getTelefono())
-                .dataNascita(request.getDataNascita())
-                .password(request.getPassword())
-                .role(Role.RISTORATORE)
-                .ristoranti(ristoranti)
-                .build();
-
-        proprietario = proprietarioRepository.saveAndFlush(proprietario);
-        return convertToResponse(proprietario);
+    public void changeRoleToRistoratore(Long id) throws EntityNotFoundException {
+        Utente proprietario = utenteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id, "Utente"));
+        proprietario.setRole(Role.RISTORATORE);
+        utenteRepository.saveAndFlush(proprietario);
     }
 
-    public ProprietarioResponse updateProprietario(Long id, ProprietarioRequest updatedRequest) throws EntityNotFoundException {
-        Proprietario proprietario = proprietarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(id, "Proprietario"));
+    public void associateRistorante(Long idProprietario, Long idRistorante) throws EntityNotFoundException {
+        Utente proprietario = utenteRepository.findById(idProprietario)
+                .orElseThrow(() -> new EntityNotFoundException(idProprietario, "Proprietario"));
+        Ristorante ristorante = ristoranteRepository.findById(idRistorante)
+                .orElseThrow(() -> new EntityNotFoundException(idRistorante, "Ristorante"));
 
-        Comune comune = Optional.ofNullable(comuneRepository.findComuneByNome(updatedRequest.getNomeComune()))
-                .orElseThrow(() -> new EntityNotFoundException(null, "Comune"));
+        if (ristorante.getProprietario() != null) {
+            throw new IllegalStateException("Questo ristorante ha già un proprietario assegnato.");
+        }
 
-        List<Ristorante> ristoranti = ristoranteRepository.findAllById(updatedRequest.getIdRistoranti());
-
-        Proprietario updatedProprietario = Proprietario.builder()
-                .id(proprietario.getId())
-                .nome(updatedRequest.getNome())
-                .cognome(updatedRequest.getCognome())
-                .email(updatedRequest.getEmail())
-                .comune(comune)
-                .indirizzo(updatedRequest.getIndirizzo())
-                .telefono(updatedRequest.getTelefono())
-                .dataNascita(updatedRequest.getDataNascita())
-                .password(updatedRequest.getPassword())
-                .role(proprietario.getRole())
-                .ristoranti(ristoranti)
-                .build();
-
-        updatedProprietario = proprietarioRepository.saveAndFlush(updatedProprietario);
-        return convertToResponse(updatedProprietario);
+        ristorante.setProprietario(proprietario);
+        ristoranteRepository.saveAndFlush(ristorante);
     }
 
-    public void deleteProprietarioById(Long id) {
-        proprietarioRepository.deleteById(id);
+    public void dissociateRistorante(Long idRistorante) throws EntityNotFoundException {
+        Ristorante ristorante = ristoranteRepository.findById(idRistorante)
+                .orElseThrow(() -> new EntityNotFoundException(idRistorante, "Ristorante"));
+
+        if (ristorante.getProprietario() == null) {
+            throw new IllegalStateException("Non è stato assegnato nessun idProprietario, si prega di assegnare un nuovo idProprietario.");
+        }
+
+        ristorante.setProprietario(null);
+        ristoranteRepository.saveAndFlush(ristorante);
     }
 
-    private ProprietarioResponse convertToResponse(Proprietario proprietario) {
+    private ProprietarioResponse convertToResponse(Utente utente) {
+        List<Ristorante> ristoranti = ristoranteRepository.findAll().stream()
+                .filter(r -> r.getProprietario() != null && r.getProprietario().getId().equals(utente.getId()))
+                .collect(Collectors.toList());
+        List<Long> idRistoranti = ristoranti.stream()
+                .map(Ristorante::getId)
+                .collect(Collectors.toList());
+        List<String> nomiRistoranti = ristoranti.stream()
+                .map(Ristorante::getNome)
+                .collect(Collectors.toList());
         return ProprietarioResponse.builder()
-                .id(proprietario.getId())
-                .nome(proprietario.getNome())
-                .cognome(proprietario.getCognome())
-                .email(proprietario.getEmail())
-                .nomeComune(proprietario.getComune().getNome())
-                .indirizzo(proprietario.getIndirizzo())
-                .telefono(proprietario.getTelefono())
-                .dataNascita(proprietario.getDataNascita())
-                .nomiRistoranti(proprietario.getRistoranti().stream().map(Ristorante::getNome).collect(Collectors.toList()))
+                .id(utente.getId())
+                .nome(utente.getNome())
+                .cognome(utente.getCognome())
+                .email(utente.getEmail())
+                .nomeComune(utente.getComune() != null ? utente.getComune().getNome() : null)
+                .indirizzo(utente.getIndirizzo())
+                .telefono(utente.getTelefono())
+                .dataNascita(utente.getDataNascita())
+                .idRistoranti(idRistoranti != null ? idRistoranti : Collections.emptyList())
+                .nomiRistoranti(nomiRistoranti != null ? nomiRistoranti : Collections.emptyList())
                 .build();
     }
 }

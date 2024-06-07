@@ -1,5 +1,6 @@
 package com.example.buonAppetito.controller;
 
+import com.example.buonAppetito.exceptions.EntityNotFoundException;
 import com.example.buonAppetito.request.RistoranteRequest;
 import com.example.buonAppetito.response.RistoranteResponse;
 import com.example.buonAppetito.services.RistoranteService;
@@ -45,10 +46,9 @@ public class RistoranteController {
     }
 
     @PostMapping("/create")
-    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> createRistorante(@RequestBody RistoranteRequest request) {
         try {
-            RistoranteResponse createdRistorante = ristoranteService.createRistorannte(request);
+            RistoranteResponse createdRistorante = ristoranteService.createRistorante(request);
             return new ResponseEntity<>(createdRistorante, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("Errore durante la creazione del ristorante", HttpStatus.INTERNAL_SERVER_ERROR);

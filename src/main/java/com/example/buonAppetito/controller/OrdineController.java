@@ -1,6 +1,7 @@
 package com.example.buonAppetito.controller;
 
 import com.example.buonAppetito.exceptions.EntityNotFoundException;
+import com.example.buonAppetito.exceptions.InvalidOrderException;
 import com.example.buonAppetito.request.OrdineRequest;
 import com.example.buonAppetito.response.OrdineResponse;
 import com.example.buonAppetito.services.OrdineService;
@@ -20,7 +21,7 @@ public class OrdineController {
     private OrdineService ordineService;
 
     @GetMapping("/get/{id}")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
     public ResponseEntity<?> getOrdineById(@PathVariable Long id) {
         try {
             OrdineResponse ordine = ordineService.getOrdineById(id);
@@ -33,7 +34,7 @@ public class OrdineController {
     }
 
     @GetMapping("/all")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> getAllOrdini() {
         try {
             List<OrdineResponse> ordini = ordineService.getAll();
@@ -49,7 +50,7 @@ public class OrdineController {
 
     @PostMapping("/create")
     @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
-    public ResponseEntity<?> createOrdine(@RequestBody OrdineRequest request) {
+    public ResponseEntity<?> createOrdine(@RequestBody OrdineRequest request){
         try {
             OrdineResponse createdOrdine = ordineService.createOrdine(request);
             return new ResponseEntity<>(createdOrdine, HttpStatus.CREATED);
@@ -83,6 +84,34 @@ public class OrdineController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>("Errore durante l'eliminazione dell'ordine", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    @PutMapping("/aggiungi-piatti/{ordineId}")
+    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
+    public ResponseEntity<?> aggiungiPiattiAllOrdine(@PathVariable Long ordineId, @RequestBody List<Long> piattiId) {
+        try {
+            OrdineResponse updatedOrdine = ordineService.aggiungiPiattiAllOrdine(ordineId, piattiId);
+            return new ResponseEntity<>(updatedOrdine, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (InvalidOrderException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Errore durante l'aggiunta dei piatti all'ordine", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/chiudi/{id}")
+    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
+    public ResponseEntity<?> chiudiOrdine(@PathVariable Long id) {
+        try {
+            OrdineResponse ordineChiuso = ordineService.chiudiOrdine(id);
+            return new ResponseEntity<>(ordineChiuso, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Errore durante la chiusura dell'ordine", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

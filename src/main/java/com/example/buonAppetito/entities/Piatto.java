@@ -1,13 +1,10 @@
 package com.example.buonAppetito.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-
 @Entity
-@Table
+@Table(name = "piatto")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,10 +17,10 @@ public class Piatto {
     private Long id;
     @Column(nullable = false)
     private String nome;
+    @Column(nullable = false)
+    private Double prezzo;
     @ManyToOne
-    @JoinColumn(name = "menu_id", nullable = false)
-    @NotNull
-    @JsonIgnore
+    @JoinColumn(name = "menu_id")
     private Menu menu;
 
 }

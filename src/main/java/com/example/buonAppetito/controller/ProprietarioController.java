@@ -1,7 +1,7 @@
 package com.example.buonAppetito.controller;
 
 import com.example.buonAppetito.exceptions.EntityNotFoundException;
-import com.example.buonAppetito.request.ProprietarioRequest;
+import com.example.buonAppetito.exceptions.RoleMismatchException;
 import com.example.buonAppetito.response.ProprietarioResponse;
 import com.example.buonAppetito.services.ProprietarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,49 +20,57 @@ public class ProprietarioController {
     private ProprietarioService proprietarioService;
 
     @GetMapping("/get/{id}")
-    @Secured({"ADMIN"})
-    public ResponseEntity<ProprietarioResponse> getProprietarioById(@PathVariable Long id) throws EntityNotFoundException {
-        ProprietarioResponse proprietario = proprietarioService.getProprietarioById(id);
-        return new ResponseEntity<>(proprietario, HttpStatus.OK);
+    @Secured({"ADMIN", "RISTORATORE"})
+    public ResponseEntity<?> getProprietarioById(@PathVariable Long id) {
+        try {
+            ProprietarioResponse proprietario = proprietarioService.getProprietarioById(id);
+            return new ResponseEntity<>(proprietario, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (RoleMismatchException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/all")
     @Secured({"ADMIN"})
     public ResponseEntity<List<ProprietarioResponse>> getAllProprietari() {
-        List<ProprietarioResponse> proprietari = proprietarioService.getAll();
+        List<ProprietarioResponse> proprietari = proprietarioService.getAllProprietari();
         return new ResponseEntity<>(proprietari, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    @Secured({"ADMIN"})
-    public ResponseEntity<ProprietarioResponse> createProprietario(@RequestBody ProprietarioRequest request) {
+    @PutMapping("/changeRoleToRistoratore/{id}")
+    @Secured({"UTENTE","ADMIN"})
+    public ResponseEntity<?> changeRoleToRistoratore(@PathVariable Long id) throws EntityNotFoundException {
         try {
-            ProprietarioResponse proprietario = proprietarioService.createProprietario(request);
-            return new ResponseEntity<>(proprietario, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            proprietarioService.changeRoleToRistoratore(id);
+            return new ResponseEntity<>("Ruolo aggiornato con successo", HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("EntityNotFoundException",HttpStatus.NOT_FOUND);
         }
     }
 
-    @PutMapping("/update/{id}")
-    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
-    public ResponseEntity<ProprietarioResponse> updateProprietario(@PathVariable Long id, @RequestBody ProprietarioRequest updatedRequest) {
+    @PutMapping("/associateRistorante/{idProprietario}/{idRistorante}")
+    @Secured({"ADMIN", "RISTORATORE"})
+    public ResponseEntity<?> associateRistorante(@PathVariable Long idProprietario, @PathVariable Long idRistorante) {
         try {
-            ProprietarioResponse proprietario = proprietarioService.updateProprietario(id, updatedRequest);
-            return new ResponseEntity<>(proprietario, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            proprietarioService.associateRistorante(idProprietario, idRistorante);
+            return new ResponseEntity<>(String.format("Il ristorante con id %d è stato associato all'utente con id %d" ,idRistorante , idProprietario),HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("EntityNotFoundException",HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/dissociaRistorante/{idRistorante}")
     @Secured({"ADMIN"})
-    public ResponseEntity<?> deleteProprietario(@PathVariable Long id) {
+    public ResponseEntity<?> dissociateRistorante(@PathVariable Long idRistorante) {
         try {
-            proprietarioService.deleteProprietarioById(id);
-            return new ResponseEntity<>("Proprietario eliminato con successo", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            proprietarioService.dissociateRistorante(idRistorante);
+            return new ResponseEntity<>("Il ristorante è senza proprietario, si prega di assegnare un nuovo proprietario",HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("EntityNotFoundException",HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

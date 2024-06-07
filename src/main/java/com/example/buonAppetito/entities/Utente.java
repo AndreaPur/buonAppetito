@@ -49,9 +49,6 @@ public class Utente implements UserDetails {
     @OneToMany(mappedBy = "utente")
     private List<Prenotazione> prenotazioni;
 
-    public Utente(Long id, String nome, String cognome, String email, Comune comune, String indirizzo, String telefono, LocalDate dataNascita, String password, String registrationToken, Role role, List<Prenotazione> prenotazioni) {
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

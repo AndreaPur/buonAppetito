@@ -12,6 +12,7 @@ import java.util.List;
 public class MenuRequest {
 
     private String nome;
-    private List<Long> idPiatti;
+    private List<Long> piattiId;
+    private Long ristoranteId;
 
 }

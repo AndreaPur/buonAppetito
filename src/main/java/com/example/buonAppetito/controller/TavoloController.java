@@ -1,5 +1,6 @@
 package com.example.buonAppetito.controller;
 
+import com.example.buonAppetito.exceptions.EntityNotFoundException;
 import com.example.buonAppetito.request.TavoloRequest;
 import com.example.buonAppetito.response.TavoloResponse;
 import com.example.buonAppetito.services.TavoloService;
@@ -19,7 +20,7 @@ public class TavoloController {
     private TavoloService tavoloService;
 
     @GetMapping("/get/{id}")
-    @Secured({"ADMIN", "RISTORATORE"})
+    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
     public ResponseEntity<?> getTavoloById(@PathVariable Long id) {
         try {
             TavoloResponse tavolo = tavoloService.getTavoloById(id);
@@ -30,7 +31,7 @@ public class TavoloController {
     }
 
     @GetMapping("/all")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> getAllTavoli() {
         try {
             List<TavoloResponse> tavoli = tavoloService.getAll();
@@ -46,7 +47,7 @@ public class TavoloController {
 
     @PostMapping("/create")
     @Secured({"ADMIN", "RISTORATORE"})
-    public ResponseEntity<?> createTavolo(@RequestBody TavoloRequest request) {
+    public ResponseEntity<?> createTavolo(@RequestBody TavoloRequest request) throws EntityNotFoundException {
         try {
             TavoloResponse createdTavolo = tavoloService.createTavolo(request);
             return new ResponseEntity<>(createdTavolo, HttpStatus.CREATED);
@@ -70,7 +71,7 @@ public class TavoloController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> deleteTavolo(@PathVariable Long id) {
         try {
             tavoloService.deleteTavoloById(id);

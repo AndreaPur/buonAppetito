@@ -3,11 +3,10 @@ package com.example.buonAppetito.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table
+@Table(name = "menu")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,8 +20,9 @@ public class Menu {
     @Column(nullable = false)
     private String nome;
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Piatto> piattiList = new ArrayList<>();
+    private List<Piatto> piatti;
     @ManyToOne
-    @JoinColumn(name = "ristorante_id", nullable = false)
+    @JoinColumn(name = "ristorante_id")
     private Ristorante ristorante;
+
 }

@@ -33,7 +33,7 @@ public class PiattoController {
     }
 
     @GetMapping("/all")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> getAllPiatti() {
         try {
             List<PiattoResponse> piatti = piattoService.getAll();
@@ -71,8 +71,21 @@ public class PiattoController {
         }
     }
 
+    @PutMapping("/addToMenu/{piattoId}/{menuId}")
+    @Secured({"ADMIN", "RISTORATORE"})
+    public ResponseEntity<?> addPiattoToMenu(@PathVariable Long piattoId, @PathVariable Long menuId) {
+        try {
+            PiattoResponse updatedPiatto = piattoService.addPiattoToMenu(piattoId, menuId);
+            return new ResponseEntity<>(updatedPiatto, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Errore durante l'aggiunta del piatto al menu", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @DeleteMapping("/delete/{id}")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> deletePiatto(@PathVariable Long id) {
         try {
             piattoService.deletePiattoById(id);

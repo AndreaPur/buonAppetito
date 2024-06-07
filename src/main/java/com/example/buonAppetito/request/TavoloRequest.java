@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class TavoloRequest {
 
-    private Long idRistorante;
-    private int posti;
+    private Long ristoranteId;
+    private Long posti;
 
 }

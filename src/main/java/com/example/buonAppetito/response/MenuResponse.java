@@ -13,6 +13,9 @@ public class MenuResponse {
 
     private Long id;
     private String nome;
-    private List<String> nomiPiatti;
+    private List<Long> piattiId;
+    private List<String> piattiNomi;
+    private List<Double> piattiPrezzi;
+    private String nomeRistorante;
 
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table
@@ -25,13 +26,16 @@ public class Prenotazione {
     @JoinColumn(name = "ristorante_id", nullable = false)
     @NotNull
     private Ristorante ristorante;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "tavolo_id", nullable = false)
     @NotNull
     private Tavolo tavolo;
     @Column(nullable = false)
+    private Long posti;
+    @Column(nullable = false)
     private LocalDateTime orario;
     @Column(nullable = false)
     private LocalDateTime timestamp;
-
+    @OneToMany(mappedBy = "prenotazione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ordine> ordini;
 }

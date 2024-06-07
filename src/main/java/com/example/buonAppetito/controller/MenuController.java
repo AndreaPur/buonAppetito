@@ -20,7 +20,7 @@ public class MenuController {
     private MenuService menuService;
 
     @GetMapping("/get/{id}")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE", "UTENTE"})
     public ResponseEntity<?> getMenuById(@PathVariable Long id) {
         try {
             MenuResponse menu = menuService.getMenuById(id);
@@ -33,7 +33,7 @@ public class MenuController {
     }
 
     @GetMapping("/all")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> getAllMenu() {
         try {
             List<MenuResponse> menu = menuService.getAllMenu();
@@ -48,7 +48,7 @@ public class MenuController {
     }
 
     @PostMapping("/create")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> createMenu(@RequestBody MenuRequest request) {
         try {
             MenuResponse createdMenu = menuService.createMenu(request);
@@ -59,8 +59,8 @@ public class MenuController {
     }
 
     @PutMapping("/update/{id}")
-    @Secured({"ADMIN"})
-    public ResponseEntity<?> updateMenu(@PathVariable Long id, @RequestBody MenuRequest updatedMenuRequest) {
+    @Secured({"ADMIN", "RISTORATORE"})
+    public ResponseEntity<?> updateMenu(@PathVariable Long id, @RequestBody MenuRequest updatedMenuRequest) throws EntityNotFoundException {
         try {
             MenuResponse updatedMenu = menuService.updateMenu(id, updatedMenuRequest);
             return new ResponseEntity<>(updatedMenu, HttpStatus.OK);
@@ -72,7 +72,7 @@ public class MenuController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @Secured({"ADMIN"})
+    @Secured({"ADMIN", "RISTORATORE"})
     public ResponseEntity<?> deleteMenu(@PathVariable Long id) {
         try {
             menuService.deleteMenuById(id);

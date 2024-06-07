@@ -1,8 +1,7 @@
 package com.example.buonAppetito.response;
 
 import lombok.*;
-
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -15,10 +14,10 @@ public class RistoranteResponse {
     private Long id;
     private String nome;
     private String indirizzo;
-    private Long comuneId;
     private String comuneNome;
-    private LocalTime orarioApertura;
-    private LocalTime orarioChiusura;
-    private List<Long> menuIds;
-    private Long idProprietario;
+    private Long postiTotali;
+    private Long postiDisponibili;
+    private LocalDateTime orarioApertura;
+    private LocalDateTime orarioChiusura;
+    private List<Long> menuId;
 }

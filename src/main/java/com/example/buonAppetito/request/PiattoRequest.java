@@ -10,5 +10,6 @@ import lombok.*;
 public class PiattoRequest {
 
     private String nome;
+    private Double prezzo;
 
 }
